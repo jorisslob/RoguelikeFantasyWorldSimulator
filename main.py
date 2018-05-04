@@ -1,8 +1,29 @@
 import tdl
 
+# actual size of the window
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
+
+# 20 frames-per-second maximum
 LIMIT_FPS = 20
+
+# size of the map
+MAP_WIDTH = 80
+MAP_HEIGHT = 45
+
+color_dark_wall = (0, 0, 100)
+color_dark_ground = (50, 50, 150)
+
+
+class Tile:
+    # A tile of the map and its properties
+    def __init__(self, blocked, block_sight=None):
+        self.blocked = blocked
+
+        # by default, if a tile is blocked, it also blocks sight
+        if block_sight is None:
+            block_sight = blocked
+        self.block_sight = block_sight
 
 
 class GameObject:
@@ -16,8 +37,9 @@ class GameObject:
 
     def move(self, dx, dy):
         # move by the given amount
-        self.x += dx
-        self.y += dy
+        if not my_map[self.x + dx][self.y + dy].blocked:
+            self.x += dx
+            self.y += dy
 
     def draw(self):
         # draw the character that represents this object at its position
@@ -26,6 +48,37 @@ class GameObject:
     def clear(self):
         # erase the character that represents this object
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
+
+
+def make_map():
+    global my_map
+
+    # fill map with "unblocked tiles"
+    my_map = [[Tile(False) for y in range(MAP_HEIGHT)]
+              for x in range(MAP_WIDTH)]
+
+    my_map[30][22].blocked = True
+    my_map[30][22].block_sight = True
+    my_map[50][22].blocked = True
+    my_map[50][22].block_sight = True
+
+
+def render_all():
+    # go through all tiles, and set their background color
+    for y in range(MAP_HEIGHT):
+        for x in range(MAP_WIDTH):
+            wall = my_map[x][y].block_sight
+            if wall:
+                con.draw_char(x, y, None, fg=None, bg=color_dark_wall)
+            else:
+                con.draw_char(x, y, None, fg=None, bg=color_dark_ground)
+
+    # draw all objects in the list
+    for obj in objects:
+        obj.draw()
+
+    # blit the contents of "con" to the root console and present it
+    root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
 
 def handle_keys():
@@ -59,25 +112,36 @@ def handle_keys():
     elif user_input.key == 'RIGHT':
         player.move(1, 0)
 
+##############################
+# Initialization & Main Loop #
+##############################
 
 tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
 root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT,
                 title="Roguelike Fantasy World Simulator", fullscreen=False)
+tdl.setFPS(LIMIT_FPS)
 con = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-tdl.setFPS(LIMIT_FPS)
-
+# create object representing the player
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', (255, 255, 255))
+
+# create an NPC
 npc = GameObject(SCREEN_WIDTH//2 - 5, SCREEN_HEIGHT//2, '@', (255, 255, 0))
+
+# the list of objects with those two
 objects = [npc, player]
 
-while not tdl.event.is_window_closed():
-    for obj in objects:
-        obj.draw()
+# generate map (at this point it's not drawn to the screen)
+make_map()
 
-    root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
+while not tdl.event.is_window_closed():
+    
+    # draw all objects in the list
+    render_all()
+
     tdl.flush()
 
+    # erase all objects at their old locations, before they move
     for obj in objects:
         obj.clear()
 
