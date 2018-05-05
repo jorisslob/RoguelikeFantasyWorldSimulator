@@ -67,8 +67,8 @@ def make_map():
               for x in range(MAP_WIDTH)]
 
     # create two rooms
-    room1 = Rect(20,15,10,15)
-    room2 = Rect(50,15,10,15)
+    room1 = Rect(20, 15, 10, 15)
+    room2 = Rect(50, 15, 10, 15)
     create_room(room1)
     create_room(room2)
     create_h_tunnel(25, 55, 23)
@@ -149,6 +149,7 @@ def handle_keys():
 ##############################
 # Initialization & Main Loop #
 ##############################
+
 
 tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
 root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT,
