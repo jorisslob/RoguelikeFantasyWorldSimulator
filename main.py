@@ -18,9 +18,15 @@ MAX_ROOMS = 30
 # 20 frames-per-second maximum
 LIMIT_FPS = 20
 
+# field of view settings
+FOV_ALGO = 'BASIC'
+FOV_LIGHT_WALLS = True
+TORCH_RADIUS = 10
 
 color_dark_wall = (0, 0, 100)
+color_light_wall = (130, 110, 50)
 color_dark_ground = (50, 50, 150)
+color_light_ground = (200, 180, 50)
 
 
 class Tile:
@@ -69,8 +75,12 @@ class GameObject:
             self.y += dy
 
     def draw(self):
-        # draw the character that represents this object at its position
-        con.draw_char(self.x, self.y, self.char, self.color, bg=None)
+        global visible_tiles
+
+        # only show if it's visible to the player
+        if (self.x, self.y) in visible_tiles:
+            # draw the character that represents this object at its position
+            con.draw_char(self.x, self.y, self.char, self.color, bg=None)
 
     def clear(self):
         # erase the character that represents this object
@@ -98,6 +108,21 @@ def create_v_tunnel(y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         my_map[x][y].blocked = False
         my_map[x][y].block_sight = False
+
+
+def is_visible_tile(x, y):
+    global my_map
+
+    if x >= MAP_WIDTH or x < 0:
+        return False
+    elif y >= MAP_HEIGHT or y < 0:
+        return False
+    elif my_map[x][y].blocked == True:
+        return False
+    elif my_map[x][y].block_sight == True:
+        return False
+    else:
+        return True
 
 
 def make_map():
@@ -165,14 +190,36 @@ def make_map():
 
 
 def render_all():
-    # go through all tiles, and set their background color
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
-            wall = my_map[x][y].block_sight
-            if wall:
-                con.draw_char(x, y, None, fg=None, bg=color_dark_wall)
-            else:
-                con.draw_char(x, y, None, fg=None, bg=color_dark_ground)
+    global fov_recompute
+    global visible_tiles
+
+    if fov_recompute:
+        fov_recompute = False
+        visible_tiles = tdl.map.quickFOV(player.x, player.y,
+                                         is_visible_tile,
+                                         fov=FOV_ALGO,
+                                         radius=TORCH_RADIUS,
+                                         lightWalls=FOV_LIGHT_WALLS)
+
+        # go through all tiles, and set their background color according to the FOV
+        for y in range(MAP_HEIGHT):
+            for x in range(MAP_WIDTH):
+                visible = (x, y) in visible_tiles
+                wall = my_map[x][y].block_sight
+                if not visible:
+                    # it's out of the player's FOV
+                    if wall:
+                        con.draw_char(x, y, None, fg=None, bg=color_dark_wall)
+                    else:
+                        con.draw_char(x, y, None, fg=None,
+                                      bg=color_dark_ground)
+                else:
+                    # it's visible
+                    if wall:
+                        con.draw_char(x, y, None, fg=None, bg=color_light_wall)
+                    else:
+                        con.draw_char(x, y, None, fg=None,
+                                      bg=color_light_ground)
 
     # draw all objects in the list
     for obj in objects:
@@ -183,6 +230,9 @@ def render_all():
 
 
 def handle_keys():
+    global playerx, playery
+    global fov_recompute
+
     # realtime
     keypress = False
     for event in tdl.event.get():
@@ -203,15 +253,19 @@ def handle_keys():
     # movement keys
     if user_input.key == 'UP':
         player.move(0, -1)
+        fov_recompute = True
 
     elif user_input.key == 'DOWN':
         player.move(0, 1)
+        fov_recompute = True
 
     elif user_input.key == 'LEFT':
         player.move(-1, 0)
+        fov_recompute = True
 
     elif user_input.key == 'RIGHT':
         player.move(1, 0)
+        fov_recompute = True
 
 ##############################
 # Initialization & Main Loop #
@@ -235,6 +289,8 @@ objects = [npc, player]
 
 # generate map (at this point it's not drawn to the screen)
 make_map()
+
+fov_recompute = True
 
 while not tdl.event.is_window_closed():
 
