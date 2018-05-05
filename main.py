@@ -34,6 +34,9 @@ class Tile:
     def __init__(self, blocked, block_sight=None):
         self.blocked = blocked
 
+        # all tiles start unexplored
+        self.explored = False
+
         # by default, if a tile is blocked, it also blocks sight
         if block_sight is None:
             block_sight = blocked
@@ -207,12 +210,14 @@ def render_all():
                 visible = (x, y) in visible_tiles
                 wall = my_map[x][y].block_sight
                 if not visible:
-                    # it's out of the player's FOV
-                    if wall:
-                        con.draw_char(x, y, None, fg=None, bg=color_dark_wall)
-                    else:
-                        con.draw_char(x, y, None, fg=None,
-                                      bg=color_dark_ground)
+                    # it's not visible right now, the player can only see it if it's explored
+                    if my_map[x][y].explored:
+                        if wall:
+                            con.draw_char(x, y, None, fg=None,
+                                          bg=color_dark_wall)
+                        else:
+                            con.draw_char(x, y, None, fg=None,
+                                          bg=color_dark_ground)
                 else:
                     # it's visible
                     if wall:
@@ -220,6 +225,8 @@ def render_all():
                     else:
                         con.draw_char(x, y, None, fg=None,
                                       bg=color_light_ground)
+                    # since it's visible, explore it
+                    my_map[x][y].explored = True
 
     # draw all objects in the list
     for obj in objects:
