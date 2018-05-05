@@ -6,7 +6,7 @@ Following a [tutorial](http://www.roguebasin.com/index.php?title=Roguelike_Tutor
 - [x] Graphics
 - [x] Objects and Map
 - [x] Dungeon
-- [ ] Field of View
+- [x] Field of View
 - [ ] Prepare for combat
 - [ ] Fight
 - [ ] The GUI
