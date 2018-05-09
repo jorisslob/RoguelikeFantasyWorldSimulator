@@ -1,3 +1,5 @@
+from tile import Tile
+
 from random import randint
 
 import tdl
@@ -27,20 +29,6 @@ color_dark_wall = (0, 0, 100)
 color_light_wall = (130, 110, 50)
 color_dark_ground = (50, 50, 150)
 color_light_ground = (200, 180, 50)
-
-
-class Tile:
-    # A tile of the map and its properties
-    def __init__(self, blocked, block_sight=None):
-        self.blocked = blocked
-
-        # all tiles start unexplored
-        self.explored = False
-
-        # by default, if a tile is blocked, it also blocks sight
-        if block_sight is None:
-            block_sight = blocked
-        self.block_sight = block_sight
 
 
 class Rect:
