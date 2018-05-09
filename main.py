@@ -1,5 +1,6 @@
 from tile import Tile
 from rect import Rect
+from gameobject import GameObject
 
 from random import randint
 
@@ -30,34 +31,6 @@ color_dark_wall = (0, 0, 100)
 color_light_wall = (130, 110, 50)
 color_dark_ground = (50, 50, 150)
 color_light_ground = (200, 180, 50)
-
-
-class GameObject:
-    # This is a generic object: the player, a monster, an item, the stairs...
-    # It's always represented by a character on screen
-    def __init__(self, x, y, char, color):
-        self.x = x
-        self.y = y
-        self.char = char
-        self.color = color
-
-    def move(self, dx, dy):
-        # move by the given amount
-        if not my_map[self.x + dx][self.y + dy].blocked:
-            self.x += dx
-            self.y += dy
-
-    def draw(self):
-        global visible_tiles
-
-        # only show if it's visible to the player
-        if (self.x, self.y) in visible_tiles:
-            # draw the character that represents this object at its position
-            con.draw_char(self.x, self.y, self.char, self.color, bg=None)
-
-    def clear(self):
-        # erase the character that represents this object
-        con.draw_char(self.x, self.y, ' ', self.color, bg=None)
 
 
 def create_room(room):
@@ -200,7 +173,7 @@ def render_all():
 
     # draw all objects in the list
     for obj in objects:
-        obj.draw()
+        obj.draw(visible_tiles, con)
 
     # blit the contents of "con" to the root console and present it
     root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
@@ -229,19 +202,19 @@ def handle_keys():
 
     # movement keys
     if user_input.key == 'UP':
-        player.move(0, -1)
+        player.move(0, -1, my_map)
         fov_recompute = True
 
     elif user_input.key == 'DOWN':
-        player.move(0, 1)
+        player.move(0, 1, my_map)
         fov_recompute = True
 
     elif user_input.key == 'LEFT':
-        player.move(-1, 0)
+        player.move(-1, 0, my_map)
         fov_recompute = True
 
     elif user_input.key == 'RIGHT':
-        player.move(1, 0)
+        player.move(1, 0, my_map)
         fov_recompute = True
 
 ##############################
@@ -278,7 +251,7 @@ while not tdl.event.is_window_closed():
 
     # erase all objects at their old locations, before they move
     for obj in objects:
-        obj.clear()
+        obj.clear(con)
 
     # handle keys and exit game if needed
     exit_game = handle_keys()
