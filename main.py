@@ -61,7 +61,7 @@ def make_map():
     rooms = []
     num_rooms = 0
 
-    for r in range(config.MAX_ROOMS):
+    for _ in range(config.MAX_ROOMS):
         # random width and height
         w = randint(config.ROOM_MIN_SIZE, config.ROOM_MAX_SIZE)
         h = randint(config.ROOM_MIN_SIZE, config.ROOM_MAX_SIZE)
@@ -115,8 +115,7 @@ def make_map():
             num_rooms += 1
 
 
-def render_all():
-    global fov_recompute
+def render_all(fov_recompute):
     global visible_tiles
 
     if fov_recompute:
@@ -160,7 +159,6 @@ def render_all():
 
 
 def handle_keys():
-    global playerx, playery
     global fov_recompute
 
     # realtime
@@ -209,10 +207,12 @@ tdl.setFPS(config.LIMIT_FPS)
 con = tdl.init(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 
 # create object representing the player
-player = GameObject(config.SCREEN_WIDTH//2, config.SCREEN_HEIGHT//2, '@', (255, 255, 255))
+player = GameObject(config.SCREEN_WIDTH//2,
+                    config.SCREEN_HEIGHT//2, '@', (255, 255, 255))
 
 # create an NPC
-npc = GameObject(config.SCREEN_WIDTH//2 - 5, config.SCREEN_HEIGHT//2, '@', (255, 255, 0))
+npc = GameObject(config.SCREEN_WIDTH//2 - 5,
+                 config.SCREEN_HEIGHT//2, '@', (255, 255, 0))
 
 # the list of objects with those two
 objects = [npc, player]
@@ -225,7 +225,7 @@ fov_recompute = True
 while not tdl.event.is_window_closed():
 
     # draw all objects in the list
-    render_all()
+    render_all(fov_recompute)
 
     tdl.flush()
 
