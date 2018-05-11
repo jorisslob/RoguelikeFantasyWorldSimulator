@@ -1,3 +1,4 @@
+from controls import handle_keys
 from gameobject import GameObject
 from themap import make_map
 import config
@@ -67,43 +68,6 @@ def render_all(fov_recompute, visible_tiles):
     root.blit(con, 0, 0, config.SCREEN_WIDTH, config.SCREEN_HEIGHT, 0, 0)
 
 
-def handle_keys(fov_recompute):
-    # realtime
-    keypress = False
-    for event in tdl.event.get():
-        if event.type == 'KEYDOWN':
-            user_input = event
-            keypress = True
-
-    if not keypress:
-        return (False, fov_recompute)
-
-    if user_input.key == 'ENTER' and user_input.alt:
-        # Alt+Enter: toggle fullscreen
-        tdl.set_fullscreen(not tdl.get_fullscreen())
-
-    elif user_input.key == 'ESCAPE':
-        return (True, False)  # exit game
-
-    # movement keys
-    if user_input.key == 'UP':
-        player.move(0, -1, my_map)
-        fov_recompute = True
-
-    elif user_input.key == 'DOWN':
-        player.move(0, 1, my_map)
-        fov_recompute = True
-
-    elif user_input.key == 'LEFT':
-        player.move(-1, 0, my_map)
-        fov_recompute = True
-
-    elif user_input.key == 'RIGHT':
-        player.move(1, 0, my_map)
-        fov_recompute = True
-
-    return (False, fov_recompute)
-
 ##############################
 # Initialization & Main Loop #
 ##############################
@@ -144,6 +108,6 @@ while not tdl.event.is_window_closed():
         obj.clear(con)
 
     # handle keys and exit game if needed
-    (exit_game, fov_recompute) = handle_keys(fov_recompute)
+    (exit_game, fov_recompute) = handle_keys(fov_recompute, player, my_map)
     if exit_game:
         break
