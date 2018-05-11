@@ -1,31 +1,11 @@
 from tile import Tile
 from rect import Rect
 from gameobject import GameObject
+import config
 
 from random import randint
 
 import tdl
-
-# actual size of the window
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
-
-# size of the map
-MAP_WIDTH = 80
-MAP_HEIGHT = 45
-
-# parameters for dungeon generation
-ROOM_MAX_SIZE = 10
-ROOM_MIN_SIZE = 6
-MAX_ROOMS = 30
-
-# 20 frames-per-second maximum
-LIMIT_FPS = 20
-
-# field of view settings
-FOV_ALGO = 'BASIC'
-FOV_LIGHT_WALLS = True
-TORCH_RADIUS = 10
 
 color_dark_wall = (0, 0, 100)
 color_light_wall = (130, 110, 50)
@@ -59,9 +39,9 @@ def create_v_tunnel(y1, y2, x):
 def is_visible_tile(x, y):
     global my_map
 
-    if x >= MAP_WIDTH or x < 0:
+    if x >= config.MAP_WIDTH or x < 0:
         return False
-    elif y >= MAP_HEIGHT or y < 0:
+    elif y >= config.MAP_HEIGHT or y < 0:
         return False
     elif my_map[x][y].blocked == True:
         return False
@@ -75,19 +55,19 @@ def make_map():
     global my_map
 
     # fill map with "blocked" tiles
-    my_map = [[Tile(True) for y in range(MAP_HEIGHT)]
-              for x in range(MAP_WIDTH)]
+    my_map = [[Tile(True) for y in range(config.MAP_HEIGHT)]
+              for x in range(config.MAP_WIDTH)]
 
     rooms = []
     num_rooms = 0
 
-    for r in range(MAX_ROOMS):
+    for r in range(config.MAX_ROOMS):
         # random width and height
-        w = randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
-        h = randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
+        w = randint(config.ROOM_MIN_SIZE, config.ROOM_MAX_SIZE)
+        h = randint(config.ROOM_MIN_SIZE, config.ROOM_MAX_SIZE)
         # random position without going out of the boundaries of the map
-        x = randint(0, MAP_WIDTH - w - 1)
-        y = randint(0, MAP_HEIGHT - h - 1)
+        x = randint(0, config.MAP_WIDTH - w - 1)
+        y = randint(0, config.MAP_HEIGHT - h - 1)
 
         # Rect class makes rectangles easier to work with
         new_room = Rect(x, y, w, h)
@@ -143,13 +123,13 @@ def render_all():
         fov_recompute = False
         visible_tiles = tdl.map.quickFOV(player.x, player.y,
                                          is_visible_tile,
-                                         fov=FOV_ALGO,
-                                         radius=TORCH_RADIUS,
-                                         lightWalls=FOV_LIGHT_WALLS)
+                                         fov=config.FOV_ALGO,
+                                         radius=config.TORCH_RADIUS,
+                                         lightWalls=config.FOV_LIGHT_WALLS)
 
         # go through all tiles, and set their background color according to the FOV
-        for y in range(MAP_HEIGHT):
-            for x in range(MAP_WIDTH):
+        for y in range(config.MAP_HEIGHT):
+            for x in range(config.MAP_WIDTH):
                 visible = (x, y) in visible_tiles
                 wall = my_map[x][y].block_sight
                 if not visible:
@@ -176,7 +156,7 @@ def render_all():
         obj.draw(visible_tiles, con)
 
     # blit the contents of "con" to the root console and present it
-    root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
+    root.blit(con, 0, 0, config.SCREEN_WIDTH, config.SCREEN_HEIGHT, 0, 0)
 
 
 def handle_keys():
@@ -223,16 +203,16 @@ def handle_keys():
 
 
 tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
-root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT,
+root = tdl.init(config.SCREEN_WIDTH, config.SCREEN_HEIGHT,
                 title="Roguelike Fantasy World Simulator", fullscreen=False)
-tdl.setFPS(LIMIT_FPS)
-con = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT)
+tdl.setFPS(config.LIMIT_FPS)
+con = tdl.init(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 
 # create object representing the player
-player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', (255, 255, 255))
+player = GameObject(config.SCREEN_WIDTH//2, config.SCREEN_HEIGHT//2, '@', (255, 255, 255))
 
 # create an NPC
-npc = GameObject(SCREEN_WIDTH//2 - 5, SCREEN_HEIGHT//2, '@', (255, 255, 0))
+npc = GameObject(config.SCREEN_WIDTH//2 - 5, config.SCREEN_HEIGHT//2, '@', (255, 255, 0))
 
 # the list of objects with those two
 objects = [npc, player]
