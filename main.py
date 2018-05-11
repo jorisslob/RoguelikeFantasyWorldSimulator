@@ -13,50 +13,43 @@ color_dark_ground = (50, 50, 150)
 color_light_ground = (200, 180, 50)
 
 
-def create_room(room):
-    global my_map
+def create_room(room, the_map):
     # go through the tiles in the rectangle and make them passable
     for x in range(room.x1 + 1, room.x2):
         for y in range(room.y1 + 1, room.y2):
-            my_map[x][y].blocked = False
-            my_map[x][y].block_sight = False
+            the_map[x][y].blocked = False
+            the_map[x][y].block_sight = False
 
 
-def create_h_tunnel(x1, x2, y):
-    global my_map
+def create_h_tunnel(x1, x2, y, the_map):
     for x in range(min(x1, x2), max(x1, x2) + 1):
-        my_map[x][y].blocked = False
-        my_map[x][y].block_sight = False
+        the_map[x][y].blocked = False
+        the_map[x][y].block_sight = False
 
 
-def create_v_tunnel(y1, y2, x):
-    global my_map
+def create_v_tunnel(y1, y2, x, the_map):
     for y in range(min(y1, y2), max(y1, y2) + 1):
-        my_map[x][y].blocked = False
-        my_map[x][y].block_sight = False
+        the_map[x][y].blocked = False
+        the_map[x][y].block_sight = False
 
 
-def is_visible_tile(x, y):
-    global my_map
-
+def is_visible_tile(x, y, the_map):
     if x >= config.MAP_WIDTH or x < 0:
         return False
     elif y >= config.MAP_HEIGHT or y < 0:
         return False
-    elif my_map[x][y].blocked == True:
+    elif the_map[x][y].blocked == True:
         return False
-    elif my_map[x][y].block_sight == True:
+    elif the_map[x][y].block_sight == True:
         return False
     else:
         return True
 
 
 def make_map():
-    global my_map
-
     # fill map with "blocked" tiles
-    my_map = [[Tile(True) for y in range(config.MAP_HEIGHT)]
-              for x in range(config.MAP_WIDTH)]
+    the_map = [[Tile(True) for y in range(config.MAP_HEIGHT)]
+               for x in range(config.MAP_WIDTH)]
 
     rooms = []
     num_rooms = 0
@@ -83,7 +76,7 @@ def make_map():
             # this means there are no intersections, so this room is valid
 
             # paint it to the map's tiles
-            create_room(new_room)
+            create_room(new_room, the_map)
 
             # center coordinates of new room, will be useful later
             (new_x, new_y) = new_room.center()
@@ -103,25 +96,27 @@ def make_map():
                 # draw a coin (random number that is either 0 or 1)
                 if randint(0, 1):
                     # first move horizontally, then vertically
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
+                    create_h_tunnel(prev_x, new_x, prev_y, the_map)
+                    create_v_tunnel(prev_y, new_y, new_x, the_map)
                 else:
                     # first move vertically, then horizontally
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
+                    create_v_tunnel(prev_y, new_y, prev_x, the_map)
+                    create_h_tunnel(prev_x, new_x, new_y, the_map)
 
             # finally, append the new room to the list
             rooms.append(new_room)
             num_rooms += 1
+    return the_map
 
 
-def render_all(fov_recompute):
-    global visible_tiles
+def render_all(fov_recompute, visible_tiles):
+    def visibility(x, y):
+        return is_visible_tile(x, y, my_map)
 
     if fov_recompute:
         fov_recompute = False
         visible_tiles = tdl.map.quickFOV(player.x, player.y,
-                                         is_visible_tile,
+                                         visibility,
                                          fov=config.FOV_ALGO,
                                          radius=config.TORCH_RADIUS,
                                          lightWalls=config.FOV_LIGHT_WALLS)
@@ -158,9 +153,7 @@ def render_all(fov_recompute):
     root.blit(con, 0, 0, config.SCREEN_WIDTH, config.SCREEN_HEIGHT, 0, 0)
 
 
-def handle_keys():
-    global fov_recompute
-
+def handle_keys(fov_recompute):
     # realtime
     keypress = False
     for event in tdl.event.get():
@@ -169,14 +162,14 @@ def handle_keys():
             keypress = True
 
     if not keypress:
-        return
+        return (False, fov_recompute)
 
     if user_input.key == 'ENTER' and user_input.alt:
         # Alt+Enter: toggle fullscreen
         tdl.set_fullscreen(not tdl.get_fullscreen())
 
     elif user_input.key == 'ESCAPE':
-        return True  # exit game
+        return (True, False)  # exit game
 
     # movement keys
     if user_input.key == 'UP':
@@ -194,6 +187,8 @@ def handle_keys():
     elif user_input.key == 'RIGHT':
         player.move(1, 0, my_map)
         fov_recompute = True
+
+    return (False, fov_recompute)
 
 ##############################
 # Initialization & Main Loop #
@@ -218,14 +213,15 @@ npc = GameObject(config.SCREEN_WIDTH//2 - 5,
 objects = [npc, player]
 
 # generate map (at this point it's not drawn to the screen)
-make_map()
+my_map = make_map()
+visible_tiles = None
 
 fov_recompute = True
 
 while not tdl.event.is_window_closed():
 
     # draw all objects in the list
-    render_all(fov_recompute)
+    render_all(fov_recompute, visible_tiles)
 
     tdl.flush()
 
@@ -234,6 +230,6 @@ while not tdl.event.is_window_closed():
         obj.clear(con)
 
     # handle keys and exit game if needed
-    exit_game = handle_keys()
+    (exit_game, fov_recompute) = handle_keys(fov_recompute)
     if exit_game:
         break
