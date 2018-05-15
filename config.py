@@ -18,6 +18,7 @@ roomsconfig = config['ROOMS']
 ROOM_MAX_SIZE = roomsconfig.getint('ROOM_MAX_SIZE')
 ROOM_MIN_SIZE = roomsconfig.getint('ROOM_MIN_SIZE')
 MAX_ROOMS = roomsconfig.getint('MAX_ROOMS')
+MAX_ROOM_MONSTERS = roomsconfig.getint('MAX_ROOM_MONSTERS')
 
 fovconfig = config['FOV']
 FOV_ALGO = fovconfig['FOV_ALGO']

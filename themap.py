@@ -1,6 +1,8 @@
 from rect import Rect
 from tile import Tile
+from gameobject import GameObject
 
+import colors
 import config
 
 from random import randint
@@ -12,6 +14,7 @@ def make_map(player):
                for x in range(config.MAP_WIDTH)]
 
     rooms = []
+    objects = []
     num_rooms = 0
 
     for _ in range(config.MAX_ROOMS):
@@ -63,10 +66,12 @@ def make_map(player):
                     create_v_tunnel(prev_y, new_y, prev_x, the_map)
                     create_h_tunnel(prev_x, new_x, new_y, the_map)
 
+            objects.extend(place_objects(new_room, the_map))
+
             # finally, append the new room to the list
             rooms.append(new_room)
             num_rooms += 1
-    return the_map
+    return (the_map, objects)
 
 
 def create_room(room, the_map):
@@ -87,3 +92,25 @@ def create_v_tunnel(y1, y2, x, the_map):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         the_map[x][y].blocked = False
         the_map[x][y].block_sight = False
+
+
+def place_objects(room, the_map):
+    # choose random number of monsters
+    num_monsters = randint(0, config.MAX_ROOM_MONSTERS)
+    objects = []
+
+    for _ in range(num_monsters):
+        # choose random spot for this monster
+        x = randint(room.x1 + 1, room.x2 - 1)
+        y = randint(room.y1 + 1, room.y2 - 1)
+
+        if randint(0, 100) < 80:  # 80% chance of getting an orc
+            # create an orc
+            monster = GameObject(x, y, 'o', colors.desaturated_green)
+        else:
+            # create a troll
+            monster = GameObject(x, y, 'T', colors.darker_green)
+
+        objects.append(monster)
+
+    return objects

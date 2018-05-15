@@ -80,15 +80,13 @@ con = tdl.init(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 player = GameObject(config.SCREEN_WIDTH//2,
                     config.SCREEN_HEIGHT//2, '@', (255, 255, 255))
 
-# create an NPC
-npc = GameObject(config.SCREEN_WIDTH//2 - 5,
-                 config.SCREEN_HEIGHT//2, '@', (255, 255, 0))
+# the list of objects, will be larger later
+objects = [player]
 
-# the list of objects with those two
-objects = [npc, player]
+# generate map (at this point it's not drawn to the screen), and extend the list of objects
+(my_map, new_objects) = make_map(player)
+objects.extend(new_objects)
 
-# generate map (at this point it's not drawn to the screen)
-my_map = make_map(player)
 visible_tiles = None
 
 fov_recompute = True
