@@ -1,12 +1,11 @@
 from controls import handle_keys
 from gameobject import GameObject
 from themap import make_map
+import colors
 import config
 
 import tdl
 
-color_dark_wall = (0, 0, 100)
-color_light_wall = (130, 110, 50)
 color_dark_ground = (50, 50, 150)
 color_light_ground = (200, 180, 50)
 
@@ -46,14 +45,14 @@ def render_all(fov_recompute, visible_tiles):
                     if my_map[x][y].explored:
                         if wall:
                             con.draw_char(x, y, None, fg=None,
-                                          bg=color_dark_wall)
+                                          bg=colors.dark_blue)
                         else:
                             con.draw_char(x, y, None, fg=None,
                                           bg=color_dark_ground)
                 else:
                     # it's visible
                     if wall:
-                        con.draw_char(x, y, None, fg=None, bg=color_light_wall)
+                        con.draw_char(x, y, None, fg=None, bg=colors.desaturated_amber)
                     else:
                         con.draw_char(x, y, None, fg=None,
                                       bg=color_light_ground)
