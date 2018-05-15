@@ -6,9 +6,6 @@ import config
 
 import tdl
 
-color_dark_ground = (50, 50, 150)
-color_light_ground = (200, 180, 50)
-
 
 def is_visible_tile(x, y, the_map):
     if x >= config.MAP_WIDTH or x < 0:
@@ -48,14 +45,15 @@ def render_all(fov_recompute, visible_tiles):
                                           bg=colors.dark_blue)
                         else:
                             con.draw_char(x, y, None, fg=None,
-                                          bg=color_dark_ground)
+                                          bg=colors.desaturated_blue)
                 else:
                     # it's visible
                     if wall:
-                        con.draw_char(x, y, None, fg=None, bg=colors.desaturated_amber)
+                        con.draw_char(x, y, None, fg=None,
+                                      bg=colors.desaturated_amber)
                     else:
                         con.draw_char(x, y, None, fg=None,
-                                      bg=color_light_ground)
+                                      bg=colors.brass)
                     # since it's visible, explore it
                     my_map[x][y].explored = True
 
