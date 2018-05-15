@@ -1,7 +1,7 @@
 import tdl
 
 
-def handle_keys(fov_recompute, player, the_map):
+def handle_keys(fov_recompute, player, the_map, objects):
     # realtime
     keypress = False
     for event in tdl.event.get():
@@ -21,19 +21,19 @@ def handle_keys(fov_recompute, player, the_map):
 
     # movement keys
     if user_input.key == 'UP':
-        player.move(0, -1, the_map)
+        player.move(0, -1, the_map, objects)
         fov_recompute = True
 
     elif user_input.key == 'DOWN':
-        player.move(0, 1, the_map)
+        player.move(0, 1, the_map, objects)
         fov_recompute = True
 
     elif user_input.key == 'LEFT':
-        player.move(-1, 0, the_map)
+        player.move(-1, 0, the_map, objects)
         fov_recompute = True
 
     elif user_input.key == 'RIGHT':
-        player.move(1, 0, the_map)
+        player.move(1, 0, the_map, objects)
         fov_recompute = True
 
     return (False, fov_recompute)

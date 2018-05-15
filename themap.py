@@ -1,6 +1,7 @@
 from rect import Rect
 from tile import Tile
 from gameobject import GameObject
+from gameobject import is_blocked
 
 import colors
 import config
@@ -104,13 +105,16 @@ def place_objects(room, the_map):
         x = randint(room.x1 + 1, room.x2 - 1)
         y = randint(room.y1 + 1, room.y2 - 1)
 
-        if randint(0, 100) < 80:  # 80% chance of getting an orc
-            # create an orc
-            monster = GameObject(x, y, 'o', colors.desaturated_green)
-        else:
-            # create a troll
-            monster = GameObject(x, y, 'T', colors.darker_green)
+        if not is_blocked(x, y, the_map, objects):
+            if randint(0, 100) < 80:  # 80% chance of getting an orc
+                # create an orc
+                monster = GameObject(
+                    x, y, 'o', 'orc', colors.desaturated_green, blocks=True)
+            else:
+                # create a troll
+                monster = GameObject(x, y, 'T', 'troll',
+                                     colors.darker_green, blocks=True)
 
-        objects.append(monster)
+            objects.append(monster)
 
     return objects

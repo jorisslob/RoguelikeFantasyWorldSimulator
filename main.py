@@ -78,7 +78,7 @@ con = tdl.init(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 
 # create object representing the player
 player = GameObject(config.SCREEN_WIDTH//2,
-                    config.SCREEN_HEIGHT//2, '@', (255, 255, 255))
+                    config.SCREEN_HEIGHT//2, '@', 'player', colors.white, blocks=True)
 
 # the list of objects, will be larger later
 objects = [player]
@@ -103,6 +103,7 @@ while not tdl.event.is_window_closed():
         obj.clear(con)
 
     # handle keys and exit game if needed
-    (exit_game, fov_recompute) = handle_keys(fov_recompute, player, my_map)
+    (exit_game, fov_recompute) = handle_keys(
+        fov_recompute, player, my_map, objects)
     if exit_game:
         break
